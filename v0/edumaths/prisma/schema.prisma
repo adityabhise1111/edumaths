@@ -11,4 +11,11 @@ model User {
   id    Int    @id @default(autoincrement())
   username  String @default("user")
   email String @unique
+  orgname        String?
+  address        String?
+  phone          String?
+  description    String?
+  profilePicture String?
+  coverPicture   String?
+
 }

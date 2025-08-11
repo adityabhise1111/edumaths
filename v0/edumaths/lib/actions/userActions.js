@@ -46,13 +46,27 @@ export async function createUser(userData){
   }
 }
 
-export async function updateUser(id, userData) {
+export async function updateProfile(email, userData) {
   try {
-    return await prisma.user.update({
-      where: { id },
-      data: userData
+    const { id, email: userEmail, ...updateData } = userData;
+    
+    const updatedUser = await prisma.user.update({
+      where: { email },
+      data: {
+        username: updateData.username,
+        orgname: updateData.orgname,
+        address: updateData.address,
+        phone: updateData.phone,
+        description: updateData.description,
+        profilePicture: updateData.profilePicture,
+        coverPicture: updateData.coverPicture,
+      }
     });
+    
+    return { success: true, user: updatedUser };
   } catch (error) {
-    throw new Error(`Failed to update user: ${error.message}`);
+    console.error('Update profile error:', error);
+    // alert("Error updating profile: " + error.message);
+    return { success: false, error: error.message };
   }
 }
