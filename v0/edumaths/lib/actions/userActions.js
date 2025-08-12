@@ -53,6 +53,7 @@ export async function updateProfile(email, userData) {
     const updatedUser = await prisma.user.update({
       where: { email },
       data: {
+        name: updateData.name,
         username: updateData.username,
         orgname: updateData.orgname,
         address: updateData.address,

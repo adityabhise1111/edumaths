@@ -36,7 +36,9 @@ const handler = NextAuth({
             //create a new user
             const newUserData = {
               email: email,
-              username: profile?.name || user.name || 'User',
+              profilePicture: profile?.picture || user.picture || '',
+              name: profile?.name || user.name || 'User',
+              username: profile.email ? profile.email.split('@')[0] : 'username',
               // Remove username field if it doesn't exist in your schema
             };
             

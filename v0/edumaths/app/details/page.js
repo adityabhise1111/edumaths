@@ -4,10 +4,11 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { findUserByEmail , updateProfile } from "@/lib/actions/userActions";
 
-const page = () => {
+const Page = () => {
   const { data: session } = useSession();
   const router = useRouter();
   const [form, setform] = useState({
+    name: "",
     username: "",
     email: "",
     orgname: "",
@@ -30,7 +31,17 @@ const page = () => {
         if (session?.user?.email){
             const userData = await findUserByEmail(session.user.email);
             if (userData) {
-                setform(userData);
+                setform({
+                  name: userData.name || "",
+                  username: userData.username || "",
+                  email: userData.email || "",
+                  orgname: userData.orgname || "",
+                  address: userData.address || "",
+                  phone: userData.phone || "",
+                  description: userData.description || "",
+                  profilePicture: userData.profilePicture || "",
+                  coverPicture: userData.coverPicture || "", 
+                });
                 console.log("User data fetched successfully:", userData);
             }
         }
@@ -54,7 +65,7 @@ const page = () => {
      try {
             const response = await updateProfile(session.user.email, form)
             if (response.success) {
-                session.user.name = form.username
+                session.user.name = form.name
                 alert("Profile updated successfully" )
                 router.push('/home')
             } else {
@@ -79,7 +90,7 @@ const page = () => {
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
                   Welcome to Your
                   <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
-                    Profile Dashboard
+                    Profile Details
                   </span>
                 </h1>
                 <p className="text-gray-600 text-lg">
@@ -119,8 +130,8 @@ const page = () => {
                     </label>
                     <input
                       type="text"
-                      name="username"
-                      value={form.username}
+                      name="name"
+                      value={form.name}
                       onChange={handleChange}
                       placeholder="Enter your full name"
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400 transition duration-300"
@@ -154,6 +165,21 @@ const page = () => {
                       value={form.orgname}
                       onChange={handleChange}
                       placeholder="Enter your organization"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400 transition duration-300"
+                    />
+                  </div>
+
+                  {/* Username Name */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      User Name
+                    </label>
+                    <input
+                      type="text"
+                      name="username"
+                      value={form.username}
+                      onChange={handleChange}
+                      placeholder="Enter your username"
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400 transition duration-300"
                     />
                   </div>
@@ -270,4 +296,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
