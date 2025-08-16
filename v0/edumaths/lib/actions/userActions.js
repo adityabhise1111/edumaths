@@ -71,3 +71,17 @@ export async function updateProfile(email, userData) {
     return { success: false, error: error.message };
   }
 }
+
+export async function getTeacherByUsername(username) {
+  try {
+    const teacher = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+    return teacher;
+  } catch (error) {
+    console.error("Error fetching teacher:", error);
+    return null;
+  }
+}

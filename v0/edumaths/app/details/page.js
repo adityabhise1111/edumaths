@@ -67,7 +67,7 @@ const Page = () => {
             if (response.success) {
                 session.user.name = form.name
                 alert("Profile updated successfully" )
-                router.push('/home')
+                router.push('/dashboard')
             } else {
                 console.error("Error updating profile:", response.error);
                 throw new Error("Error updating profile" + response.error)
