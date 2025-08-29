@@ -5,7 +5,8 @@ import { getTeacherByUsername } from "@/lib/actions/userActions";
 
 
 export async function generateMetadata({ params }) {
-  const teacher = await getTeacherByUsername(params.username);
+  const { username } = await params;
+  const teacher = await getTeacherByUsername(username);
   
   if (!teacher) {
     return {

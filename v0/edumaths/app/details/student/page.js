@@ -2,23 +2,20 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { createClassForTeacher, findUserByEmail, updateProfile } from "@/lib/actions/userActions";
-import { v4 as uuidv4 } from 'uuid';
+import { findUserByEmail, updateProfile ,addClassMember } from "@/lib/actions/userActions";
 
 const Page = () => {
   const { data: session } = useSession();
   const router = useRouter();
+
+  const [classId, setclassId] = useState("");
   const [form, setform] = useState({
-    
     name: "",
     username: "",
     email: "",
-    orgname: "",
     address: "",
     phone: "",
-    description: "",
     profilePicture: "",
-    coverPicture: "",
   });
 
   const handleChange = (e) => {
@@ -29,26 +26,24 @@ const Page = () => {
   };
 
   const getdata = async () => {
-    try{
-        if (session?.user?.email){
-            const userData = await findUserByEmail(session.user.email);
-            if (userData) {
-                setform({
-                  id : userData.id || "",
-                  name: userData.name || "",
-                  username: userData.username || "",
-                  email: userData.email || "",
-                  orgname: userData.orgname || "",
-                  address: userData.address || "",
-                  phone: userData.phone || "",
-                  description: userData.description || "",
-                  profilePicture: userData.profilePicture || "",
-                  coverPicture: userData.coverPicture || "",
-                  teacherId : userData.teacherId || "", 
-                });
-                console.log("User data fetched successfully:", userData);
-            }
+    try {
+      if (session?.user?.email) {
+        const userData = await findUserByEmail(session.user.email);
+        if (userData) {
+          setform({
+            name: userData.name || "",
+            username: userData.username || "",
+            email: userData.email || "",
+            orgname: userData.orgname || "",
+            address: userData.address || "",
+            phone: userData.phone || "",
+            description: userData.description || "",
+            profilePicture: userData.profilePicture || "",
+            coverPicture: userData.coverPicture || "",
+          });
+          console.log("User data fetched successfully:", userData);
         }
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -57,7 +52,7 @@ const Page = () => {
   useEffect(() => {
     document.title = "Profile Details - EduMaths";
     if (session === null) {
-      router.push("/register/teacher");
+      router.push("/register/student");
     } else {
       getdata();
     }
@@ -65,11 +60,11 @@ const Page = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // TODO: Add submit logic later
     try {
-      // 1. Update user profile and set role to TEACHER
       const updatedProfile = await updateProfile(session.user.email, {
         ...form,
-        role: "TEACHER",
+        role: "STUDENT",
       });
       console.log(form);
       if (!updatedProfile.success) {
@@ -81,29 +76,27 @@ const Page = () => {
       if (!updatedUser) {
         throw new Error("Failed to fetch updated user data");
       }
-
-      // 3. Create class for teacher using the user ID
-      const classData = {
-        name: form.orgname || form.name || "My Class",
-        description: form.description,
-        profilePicture: form.profilePicture,
-        coverPicture: form.coverPicture,
+      // 3. Add the student to the class
+      const classMember = {
+        studentId: updatedUser.id,
+        classId: classId,
       };
-      
-      console.log("Creating class for teacherId:", updatedUser.id);
-      const response = await createClassForTeacher(updatedUser.id, classData);
-      
+      console.log("Class member data:", classMember);
+
+      const response = await addClassMember(classMember);
       if (response.success) {
         session.user.name = form.name;
-        alert("Profile and class updated successfully");
-        router.push('/dashboard');
+        alert("Profile updated successfully");
+        router.push("/abbc");
       } else {
-        throw new Error(response.error || "Error creating class");
+        console.error("Error updating profile:", response.error);
+        throw new Error("Error updating profile" + response.error);
       }
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
-      alert("Error updating profile: " + error.message);
+      alert("Error updating profile" + error.message);
     }
+    console.log("Form submitted:", form);
+    setform(form);
   };
 
   return (
@@ -121,30 +114,32 @@ const Page = () => {
                   </span>
                 </h1>
                 <p className="text-gray-600 text-lg">
-                  Signed in as <span className="font-semibold text-purple-600">{session.user.email}</span>
+                  Signed in as{" "}
+                  <span className="font-semibold text-purple-600">
+                    {session.user.email}
+                  </span>
                 </p>
               </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-4">
-                <button
-                  onClick={() => router.push('/dashboard')}
-                  className="inline-flex items-center justify-center px-6 py-3 border border-green-300 rounded-xl shadow-sm bg-white text-green-600 font-medium hover:bg-green-50 focus:outline-none focus:ring-4 focus:ring-green-200 transition duration-300 ease-in-out transform hover:-translate-y-0.5"
+
+              <button
+                onClick={() => signOut()}
+                className="inline-flex items-center justify-center px-6 py-3 border border-red-300 rounded-xl shadow-sm bg-white text-red-600 font-medium hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-200 transition duration-300 ease-in-out transform hover:-translate-y-0.5"
+              >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12h18M3 12l6-6m-6 6l6 6" />
-                  </svg>
-                  Go to Dashboard
-                </button>
-                <button
-                  onClick={() => signOut()}
-                  className="inline-flex items-center justify-center px-6 py-3 border border-red-300 rounded-xl shadow-sm bg-white text-red-600 font-medium hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-200 transition duration-300 ease-in-out transform hover:-translate-y-0.5"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  Sign Out
-                </button>
-              </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                Sign Out
+              </button>
             </div>
 
             {/* Profile Form Section */}
@@ -189,21 +184,6 @@ const Page = () => {
                       placeholder="Enter your email"
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400 transition duration-300"
                       readOnly
-                    />
-                  </div>
-
-                  {/* Organization Name */}
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">
-                      Organization Name
-                    </label>
-                    <input
-                      type="text"
-                      name="orgname"
-                      value={form.orgname}
-                      onChange={handleChange}
-                      placeholder="Enter your organization"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400 transition duration-300"
                     />
                   </div>
 
@@ -253,19 +233,41 @@ const Page = () => {
                   />
                 </div>
 
-                {/* Description Field */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    About You
-                  </label>
-                  <textarea
-                    name="description"
-                    value={form.description}
-                    onChange={handleChange}
-                    placeholder="Tell us about yourself and your teaching experience..."
-                    rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400 transition duration-300 resize-none"
-                  />
+                {/* Class Join Section */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 space-y-4">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <svg
+                      className="w-6 h-6 mr-2 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                      />
+                    </svg>
+                    Join a Class
+                  </h3>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Class ID
+                    </label>
+                    <input
+                      type="text"
+                      value={classId}
+                      onChange={(e) => setclassId(e.target.value)}
+                      placeholder="Enter the Class ID provided by your teacher"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-green-200 focus:border-green-400 transition duration-300"
+                    />
+                    <p className="text-sm text-gray-600 mt-2">
+                      💡 Ask your teacher for the Class ID to join their class.
+                      You can also add this later from your profile.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Profile Pictures Section */}
@@ -273,7 +275,7 @@ const Page = () => {
                   <h3 className="text-lg font-bold text-gray-900 mb-4">
                     Profile Images
                   </h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Profile Picture */}
                     <div className="space-y-2">
@@ -289,21 +291,6 @@ const Page = () => {
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400 transition duration-300"
                       />
                     </div>
-
-                    {/* Cover Picture */}
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-700">
-                        Cover Picture URL
-                      </label>
-                      <input
-                        type="url"
-                        name="coverPicture"
-                        value={form.coverPicture}
-                        onChange={handleChange}
-                        placeholder="https://example.com/cover.jpg"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-400 transition duration-300"
-                      />
-                    </div>
                   </div>
                 </div>
 
@@ -313,8 +300,18 @@ const Page = () => {
                     type="submit"
                     className="w-full inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-purple-300 focus:ring-opacity-75 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-[1.02]"
                   >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                     Update Profile
                   </button>

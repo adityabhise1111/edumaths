@@ -68,6 +68,7 @@ const handler = NextAuth({
           if (dbUser) {
             session.user.id = dbUser.id.toString();
             session.user.username = dbUser.username;
+            session.user.role = dbUser.role;
             console.log("Updated session.user.id to:", session.user.id);
           }
         }

@@ -63,6 +63,10 @@ const Page = () => {
     e.preventDefault();
     // TODO: Add submit logic later
      try {
+            setform({
+              ...form,
+              role: "teacher",
+            });
             const response = await updateProfile(session.user.email, form)
             if (response.success) {
                 session.user.name = form.name
