@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SessionWrapper from "@/components/SessionWrapper";
+import ConditionalLayout from "@/components/ConditionalLayout";
 
 
 const geistSans = Geist({
@@ -27,9 +28,9 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionWrapper>
-        <Navbar/>
-        {children}
-        <Footer/>
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
         </SessionWrapper>
       </body>
     </html>

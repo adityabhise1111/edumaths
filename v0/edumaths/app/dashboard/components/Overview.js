@@ -5,11 +5,65 @@ import {
   QuestionMarkCircleIcon,
   ChartBarIcon,
   ClockIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  ClipboardIcon
 } from "@heroicons/react/24/outline";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { getClassIdByTeacherId, createClassForTeacher } from "@/lib/actions/userActions";
+import Link from "next/link";
 
 const Overview = () => {
-  // Mock data - replace with real data from your database
+  const { data: session } = useSession();
+  const [classId, setClassId] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const fetchClassId = async () => {
+      console.log("fetchClassId called, session:", session);
+      
+      if (!session?.user?.id) {
+        console.log("No session or user ID available yet");
+        return;
+      }
+      
+      console.log("Fetching class ID for teacherId:", session.user.id);
+      
+      try {
+        // Call server action directly
+        const classIdResult = await getClassIdByTeacherId(session.user.id);
+        console.log("getClassIdByTeacherId returned:", classIdResult);
+        
+        if (classIdResult) {
+          console.log("Class ID found:", classIdResult);
+          setClassId(classIdResult);
+        } else {
+          console.log("No class found, attempting to create one...");
+          // Create a new class for this teacher
+          const newClassResult = await createClassForTeacher(session.user.id, {});
+          if (newClassResult.success) {
+            setClassId(newClassResult.class.id);
+            console.log("Created new class with ID:", newClassResult.class.id);
+          } else {
+            console.error("Failed to create class:", newClassResult.error);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching class ID:", err);
+        setClassId("");
+      }
+    };
+    
+    fetchClassId();
+  }, [session]);
+
+  const handleCopy = () => {
+    if (classId) {
+      navigator.clipboard.writeText(classId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
   const stats = [
     {
       name: "Total Students",
@@ -106,6 +160,26 @@ const Overview = () => {
 
   return (
     <div className="space-y-6">
+      {/* Class ID Section */}
+      {classId && (
+        <div className="bg-white rounded-lg shadow-sm p-6 flex items-center gap-4">
+          <span className="font-semibold text-gray-700">Your Class ID:</span>
+          <span className="font-mono text-indigo-600 bg-indigo-50 px-2 py-1 rounded select-all">{classId}</span>
+          <button
+            onClick={handleCopy}
+            className="ml-2 flex items-center px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+          >
+            <ClipboardIcon className="h-5 w-5 mr-1" />
+            {copied ? "Copied!" : "Copy"}
+          </button>
+          <Link
+            href={`/${session?.user?.username || ""}`}
+            className="ml-2 px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition text-sm font-medium"
+          >
+            Go to Profile
+          </Link>
+        </div>
+      )}
       {/* Page Header */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Dashboard Overview</h1>

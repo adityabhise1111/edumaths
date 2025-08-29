@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import DashboardSidebar from "./components/DashboardSidebar";
@@ -10,15 +10,20 @@ import ExamsSection from "./components/ExamsSection";
 import QuestionsSection from "./components/QuestionsSection";
 import SettingsSection from "./components/SettingsSection";
 
+
 const DashboardPage = () => {
   const { data: session } = useSession();
   const router = useRouter();
   const [activeSection, setActiveSection] = useState("overview");
 
-  if (!session) {
-    router.push("/register");
-    return null;
-  }
+
+  // Redirect to /register if not authenticated (client-side only)
+  React.useEffect(() => {
+    if (session === null) {
+      router.push("/register/teacher");
+    }
+  }, [session, router]);
+  if (!session) return null;
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -42,20 +47,18 @@ const DashboardPage = () => {
       {/* Dashboard Header */}
       <DashboardHeader session={session} />
       
-      <div className="flex">
-        {/* Sidebar */}
-        <DashboardSidebar 
-          activeSection={activeSection} 
-          setActiveSection={setActiveSection} 
-        />
-        
-        {/* Main Content */}
-        <main className="flex-1 p-6 ml-64">
-          <div className="max-w-7xl mx-auto">
-            {renderActiveSection()}
-          </div>
-        </main>
-      </div>
+      {/* Sidebar */}
+      <DashboardSidebar 
+        activeSection={activeSection} 
+        setActiveSection={setActiveSection} 
+      />
+      
+      {/* Main Content */}
+      <main className="ml-64 pt-16 p-6">
+        <div className="max-w-7xl mx-auto">
+          {renderActiveSection()}
+        </div>
+      </main>
     </div>
   );
 };

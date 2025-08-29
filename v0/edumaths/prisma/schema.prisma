@@ -8,15 +8,53 @@ datasource db {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  name  String @default("username")
-  username  String @unique
-  email String @unique
-  orgname        String?
-  address        String?
-  phone          String?
-  description    String?
+  id        String   @unique
+  name      String
+  username  String   @unique
+  email     String   @unique
+  profilePicture String?
+  role      Role     @default(STUDENT) // TEACHER or STUDENT
+  createdAt DateTime @default(now())
+
+  // Relations
+  classes       Class[]        @relation("TeacherClasses") // if teacher → many classes
+  classMembers  ClassMember[]  // if student → memberships
+}
+
+model Class {
+  id          String   @unique
+  name        String
+  description String?
   profilePicture String?
   coverPicture   String?
+  createdAt   DateTime      @default(now())
 
+  teacher     User          @relation("TeacherClasses", fields: [teacherId], references: [id])
+  teacherId   String
+
+  members     ClassMember[]
+}
+
+model ClassMember {
+  id        String   @unique
+  student   User     @relation(fields: [studentId], references: [id])
+  studentId String
+
+  class     Class    @relation(fields: [classId], references: [id])
+  classId   String
+
+  status    MemberStatus @default(PENDING) // PENDING, APPROVED, REJECTED
+  joinedAt  DateTime     @default(now())
+}
+
+enum Role {
+  TEACHER
+  STUDENT
+}
+
+enum MemberStatus {
+  PENDING
+  APPROVED
+  REJECTED
+npx
 }

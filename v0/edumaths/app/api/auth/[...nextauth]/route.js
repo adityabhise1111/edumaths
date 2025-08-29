@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import { findUserByEmail, createUser } from "@/lib/actions/userActions";
+import { v4 as uuidv4 } from 'uuid';
 
 const handler = NextAuth({
   // Configure one or more authentication providers
@@ -35,6 +36,7 @@ const handler = NextAuth({
           if (!currentUser) {
             //create a new user
             const newUserData = {
+              id : uuidv4(),
               email: email,
               profilePicture: profile?.picture || user.picture || '',
               name: profile?.name || user.name || 'User',
@@ -56,21 +58,24 @@ const handler = NextAuth({
         return false;
       }
     },
-  },
-  async session({ session, token }) {
-    // You can add custom fields to the session here
-    try{
-    if (session.user?.email) {
-      const dbUser = await findUserByEmail(session.user.email);
-      if (dbUser) {
-        session.user.id = dbUser.id.toString();
-        session.user.username = dbUser.username;
-      }
-    }
-    } catch (error) {
+    async session({ session, token }) {
+      // You can add custom fields to the session here
+      try {
+        console.log("Session callback called with session:", session);
+        if (session.user?.email) {
+          const dbUser = await findUserByEmail(session.user.email);
+          console.log("Found dbUser:", dbUser);
+          if (dbUser) {
+            session.user.id = dbUser.id.toString();
+            session.user.username = dbUser.username;
+            console.log("Updated session.user.id to:", session.user.id);
+          }
+        }
+      } catch (error) {
         console.error('Session callback error:', error);
       }
-    return session;
+      return session;
+    },
   },
   debug: true, 
 });

@@ -49,7 +49,7 @@ const DashboardSidebar = ({ activeSection, setActiveSection }) => {
   ];
 
   return (
-    <div className="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 pt-16 shadow-sm">
+    <div className="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 pt-16 shadow-sm z-40">
       <div className="flex flex-col h-full">
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-2">

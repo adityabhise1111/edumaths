@@ -14,7 +14,7 @@ function LandingPage() {
   // Function to handle the "Get Started" button click
   const handleGetStartedClick = () => {
     // Redirect to the registration page
-    window.location.href = '/register';
+    window.location.href = '/register/teacher';
   };
 
   return (
