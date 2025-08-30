@@ -1,31 +1,31 @@
 import { notFound } from "next/navigation";
 import TeacherProfile from "./components/TeacherProfile";
-import { getTeacherByUsername } from "@/lib/actions/userActions";
+import { getTeacherByUsername , getClassByOrgname } from "@/lib/actions/userActions";
 
 
 
 export async function generateMetadata({ params }) {
   const { username } = await params;
-  const teacher = await getTeacherByUsername(username);
-  
-  if (!teacher) {
+  const classData = await getClassByOrgname(username);
+
+  if (!classData) {
     return {
-      title: "Teacher Not Found - EduMaths",
+      title: "Class Not Found - EduMaths",
     };
   }
 
   return {
-    title: `${teacher.name} - Abacus Classes | EduMaths`,
-    description: `Join ${teacher.name}'s abacus and mental math classes. ${teacher.description || 'Learn abacus and improve your mathematical skills.'}`,
+    title: `${classData.name} - Abacus Classes | EduMaths`,
+    description: `Join ${classData}'s abacus and mental math classes. ${classData || 'Learn abacus and improve your mathematical skills.'}`,
   };
 }
 
 export default async function TeacherPage({ params }) {
-  const teacher = await getTeacherByUsername(params.username);
+  const classData = await getClassByOrgname(params.username);
 
-  if (!teacher) {
+  if (!classData) {
     notFound();
   }
 
-  return <TeacherProfile teacher={teacher} />;
+  return <TeacherProfile teacher={classData} />;
 }

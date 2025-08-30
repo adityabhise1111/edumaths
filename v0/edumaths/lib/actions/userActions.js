@@ -199,7 +199,7 @@ export async function updateProfile(email, userData) {
 
 export async function getTeacherByUsername(username) {
   try {
-    const teacher = await prisma.user.findUnique({
+    const teacher = await prisma.User.findUnique({
       where: {
         username: username,
       },
@@ -209,4 +209,19 @@ export async function getTeacherByUsername(username) {
     console.error("Error fetching teacher:", error);
     return null;
   }
+}
+
+export async function getClassByOrgname(orgname){
+  try{
+    const classObj = await prisma.Class.findFirst({
+      where:{
+        name : orgname,
+      }
+    });
+    return classObj;
+  }catch(err){
+    console.error("Error fetching class by orgname:", err);
+    return null;
+  }
+
 }
