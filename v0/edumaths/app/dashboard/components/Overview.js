@@ -173,7 +173,7 @@ const Overview = () => {
             {copied ? "Copied!" : "Copy"}
           </button>
           <Link
-            href={`/${session?.user?.username || ""}`}
+            href={`/${session?.user?.orgname || ""}`}
             className="ml-2 px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition text-sm font-medium"
           >
             Go to Profile

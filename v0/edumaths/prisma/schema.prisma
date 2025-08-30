@@ -19,6 +19,7 @@ model User {
   // Relations
   classes       Class[]        @relation("TeacherClasses") // if teacher → many classes
   classMembers  ClassMember[]  // if student → memberships
+  scores        Score[]        // Add this relation for student scores
 }
 
 model Class {
@@ -33,6 +34,7 @@ model Class {
   teacherId   String
 
   members     ClassMember[]
+  exams       Exam[]        // Add this relation for class exams
 }
 
 model ClassMember {
@@ -56,5 +58,57 @@ enum MemberStatus {
   PENDING
   APPROVED
   REJECTED
-npx
+}
+
+model Question {
+  id           String   @unique
+  questionText String
+  optionA      String
+  optionB      String
+  optionC      String
+  optionD      String
+  correctOption String   // e.g. "A", "B", "C", "D"
+  level        String    // "easy" | "medium" | "hard"
+
+  examQuestions ExamQuestion[]
+}
+
+// --------------------
+// Exam table
+// --------------------
+model Exam {
+  id          String   @unique
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id])
+  startTime   DateTime
+  endTime     DateTime
+  levelOfExam String   // "easy" | "medium" | "hard"
+
+  examQuestions ExamQuestion[]
+  scores        Score[]
+}
+
+// --------------------
+// Linking Exam ↔ Questions
+// --------------------
+model ExamQuestion {
+  id         String   @unique
+  examId     String
+  questionId String
+
+  exam       Exam     @relation(fields: [examId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id])
+}
+
+// --------------------
+// Student scores
+// --------------------
+model Score {
+  id        String   @unique
+  studentId String
+  examId    String
+  score     Int
+
+  student   User @relation(fields: [studentId], references: [id])
+  exam      Exam @relation(fields: [examId], references: [id])
 }
