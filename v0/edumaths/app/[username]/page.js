@@ -21,7 +21,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function TeacherPage({ params }) {
-  const classData = await getClassByOrgname(params.username);
+  const {username} = await params;
+  const classData = await getClassByOrgname(username);
 
   if (!classData) {
     notFound();

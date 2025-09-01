@@ -12,8 +12,12 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { getClassIdByTeacherId, createClassForTeacher } from "@/lib/actions/userActions";
 import Link from "next/link";
+import ExamScheduller from "./ExamScheduller";
+
+
 
 const Overview = () => {
+  const [schedule, setschedule] = useState(false);
   const { data: session } = useSession();
   const [classId, setClassId] = useState("");
   const [copied, setCopied] = useState(false);
@@ -280,13 +284,15 @@ const Overview = () => {
               ))}
             </div>
             <div className="mt-4">
-              <button className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:from-indigo-700 hover:to-purple-700 transition-all duration-200">
+              <button onClick={()=>{setschedule(true)} } className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:from-indigo-700 hover:to-purple-700 transition-all duration-200">
                 Schedule New Exam
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {schedule && ( <ExamScheduller/> )}
 
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow-sm p-6">

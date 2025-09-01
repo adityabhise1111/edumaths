@@ -97,6 +97,7 @@ const Page = () => {
         session.user.name = form.name;
         alert("Profile and class updated successfully");
         session.user.orgname = form.orgname;
+        alert("orgname is =" + session.user.orgname);
         router.push('/dashboard');
       } else {
         throw new Error(response.error || "Error creating class");

@@ -9,6 +9,8 @@ import StudentsSection from "./components/StudentsSection";
 import ExamsSection from "./components/ExamsSection";
 import QuestionsSection from "./components/QuestionsSection";
 import SettingsSection from "./components/SettingsSection";
+import { getClassIdByTeacherId } from "@/lib/actions/userActions";
+
 
 
 const DashboardPage = () => {
@@ -18,10 +20,17 @@ const DashboardPage = () => {
 
 
   // Redirect to /register if not authenticated (client-side only)
-  React.useEffect(() => {
+  React.useEffect(  () => {
     if (session === null) {
       router.push("/register/teacher");
     }
+
+    async (params) => {
+      const classId = await getClassIdByTeacherId(session.user.id);
+      session.user.classId = classId;
+    }
+    
+    
   }, [session, router]);
   if (!session) return null;
 

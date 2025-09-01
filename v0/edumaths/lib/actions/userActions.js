@@ -225,3 +225,13 @@ export async function getClassByOrgname(orgname){
   }
 
 }
+
+export async function createExam(examData) {
+  try {
+    return await prisma.Exam.create({
+      data: examData,
+    });
+  } catch (error) {
+    throw new Error(`Failed to create exam: ${error.message}`);
+  }
+}
